@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0B0E11" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>MonAI</title>
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+  <link rel="apple-touch-icon" href="./icon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Top Header -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-logo" aria-hidden="true">€</div>
+        <span class="brand-name">Mon<span class="brand-ai">AI</span></span>
+        <span class="live-dot" title="Memória Local Ativa"></span>
+      </div>
+      <div class="topbar-actions">
+        <button id="btnPrivacy" class="icon-btn" title="Ocultar/Mostrar Valores" aria-label="Privacidade">
+          <svg id="eyeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+        <button id="btnSettings" class="icon-btn" title="Definições e Backup" aria-label="Definições">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Month Selector Bar -->
+    <nav class="month-bar" aria-label="Navegação Mensal">
+      <button id="prevMonth" class="month-arrow" aria-label="Mês Anterior">‹</button>
+      <button id="currentMonthLabel" class="month-title" title="Voltar ao mês atual">NOVEMBRO 2026</button>
+      <button id="nextMonth" class="month-arrow" aria-label="Mês Seguinte">›</button>
+    </nav>
+
+    <!-- Main Views Container -->
+    <main class="main-content">
+      <!-- TAB 1: CARTEIRA (MÊS ATUAL) -->
+      <section id="view-wallet" class="tab-view active">
+        <!-- Balance Hero Card -->
+        <div class="card hero-card">
+          <div class="hero-top">
+            <span class="label-muted">SALDO DISPONÍVEL DO MÊS</span>
+            <span id="pnlBadge" class="pnl-badge neutral">0.0% vs mês ant.</span>
+          </div>
+          <div id="heroBalance" class="hero-balance mono">0,00 €</div>
+          <div id="rolloverNote" class="rollover-note hidden">Inclui <span id="rolloverVal" class="mono">0,00 €</span> transitado</div>
+
+          <div class="summary-grid">
+            <div class="summary-box">
+              <span class="summary-label">ENTRADAS</span>
+              <span id="totalIncome" class="summary-val green mono">+0,00 €</span>
+            </div>
+            <div class="summary-box">
+              <span class="summary-label">SAÍDAS</span>
+              <span id="totalExpense" class="summary-val red mono">-0,00 €</span>
+            </div>
+          </div>
+
+          <!-- Exchange-style Quick Action Buttons -->
+          <div class="quick-actions">
+            <button class="action-btn primary-glow" data-open-tx="income">
+              <span class="action-icon">+</span>
+              <span>Entrada</span>
+            </button>
+            <button class="action-btn danger-outline" data-open-tx="expense">
+              <span class="action-icon">−</span>
+              <span>Gasto</span>
+            </button>
+            <button class="action-btn" data-switch-tab="fixed">
+              <span class="action-icon">⚡</span>
+              <span>Fixas</span>
+            </button>
+            <button class="action-btn" data-switch-tab="pots">
+              <span class="action-icon">🛡️</span>
+              <span>Cofres</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Daily Cashflow Line Chart -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Evolução do Saldo Diário</h3>
+            <span id="fixedQuickStat" class="pill-tag">Fixas: 0/0</span>
+          </div>
+          <div class="canvas-wrap">
+            <canvas id="dailyChart" height="150"></canvas>
+          </div>
+        </div>
+
+        <!-- Category Donut Chart -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Distribuição de Gastos</h3>
+            <span id="expenseRatioTag" class="pill-tag">0% gasto</span>
+          </div>
+          <div class="donut-layout">
+            <div class="donut-box">
+              <canvas id="categoryChart" width="140" height="140"></canvas>
+              <div class="donut-center">
+                <span class="donut-sub">TOTAL</span>
+                <span id="donutTotal" class="donut-val mono">0€</span>
+              </div>
+            </div>
+            <div id="categoryLegend" class="category-legend"></div>
+          </div>
+        </div>
+
+        <!-- Transactions List -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Livro de Movimentos</h3>
+            <select id="filterCategory" class="mini-select" aria-label="Filtrar categoria">
+              <option value="ALL">Todas</option>
+            </select>
+          </div>
+          <input type="search" id="searchTx" class="search-input" placeholder="Pesquisar descrição ou valor..." />
+          <div id="txList" class="tx-list"></div>
+        </div>
+      </section>
+
+      <!-- TAB 2: FIXAS & ORÇAMENTOS -->
+      <section id="view-fixed" class="tab-view">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3>Despesas Fixas Mensais</h3>
+              <p class="sub-text">Marca como pago para lançar no mês atual</p>
+            </div>
+            <button id="btnAddFixed" class="btn-small">+ Nova Fixa</button>
+          </div>
+          <div class="fixed-summary-bar">
+            <span>Comprometido: <strong id="fixedTotalCommitted" class="mono">0,00 €</strong></span>
+            <span>Pago: <strong id="fixedTotalPaid" class="green mono">0,00 €</strong></span>
+          </div>
+          <div id="fixedList" class="stack-list"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3>Limites por Categoria</h3>
+              <p class="sub-text">Teto mensal definido para cada categoria</p>
+            </div>
+          </div>
+          <div id="budgetList" class="stack-list"></div>
+        </div>
+      </section>
+
+      <!-- TAB 3: COFRES (MEALHEIROS ACUMULADOS) -->
+      <section id="view-pots" class="tab-view">
+        <div class="card hero-card">
+          <div class="hero-top">
+            <span class="label-muted">TOTAL ACUMULADO EM COFRES</span>
+            <span class="pill-tag blue-tag">Contínuo</span>
+          </div>
+          <div id="potsGrandTotal" class="hero-balance mono">0,00 €</div>
+          <button id="btnAddPot" class="btn-full primary-glow" style="margin-top: 12px;">+ Criar Novo Cofre</button>
+        </div>
+
+        <div id="potsList" class="stack-list"></div>
+      </section>
+
+      <!-- TAB 4: ANUAL -->
+      <section id="view-yearly" class="tab-view">
+        <div class="card">
+          <div class="card-header">
+            <h3>Performance Anual <span id="yearlyTitleYear" class="blue-text">2026</span></h3>
+            <span id="yearlyNetBadge" class="pnl-badge neutral">0,00 €</span>
+          </div>
+          <div class="canvas-wrap">
+            <canvas id="yearlyChart" height="190"></canvas>
+          </div>
+          <div class="legend-inline">
+            <span><i class="dot green-bg"></i> Entradas</span>
+            <span><i class="dot red-bg"></i> Saídas</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>Resumo Mês a Mês</h3>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Mês</th>
+                  <th>Entradas</th>
+                  <th>Saídas</th>
+                  <th>Balanço</th>
+                </tr>
+              </thead>
+              <tbody id="yearlyTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-tab="wallet">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="5" width="20" height="14" rx="2"/>
+          <path d="M16 12h.01"/>
+        </svg>
+        <span>Carteira</span>
+      </button>
+      <button class="nav-item" data-tab="fixed">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+        </svg>
+        <span>Fixas</span>
+      </button>
+      <button class="nav-item" data-tab="pots">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        <span>Cofres</span>
+      </button>
+      <button class="nav-item" data-tab="yearly">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="20" x2="18" y2="10"/>
+          <line x1="12" y1="20" x2="12" y2="4"/>
+          <line x1="6" y1="20" x2="6" y2="14"/>
+        </svg>
+        <span>Anual</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- MODAL: NOVO MOVIMENTO -->
+  <div id="modalTx" class="modal-backdrop hidden">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3 id="modalTxTitle">Novo Movimento</h3>
+        <button class="close-modal" data-close="modalTx">✕</button>
+      </div>
+      <form id="formTx">
+        <div class="type-toggle">
+          <button type="button" class="type-btn active-expense" data-tx-type="expense">Despesa</button>
+          <button type="button" class="type-btn" data-tx-type="income">Receita</button>
+        </div>
+
+        <div class="amount-field">
+          <input type="number" id="txAmount" step="0.01" min="0.01" placeholder="0.00" required />
+          <span class="currency-suffix">€</span>
+        </div>
+
+        <label class="field-label">Categoria</label>
+        <div id="txCategoryGrid" class="cat-grid"></div>
+
+        <div class="form-row">
+          <div>
+            <label class="field-label" for="txDate">Data</label>
+            <input type="date" id="txDate" class="text-input" required />
+          </div>
+          <div>
+            <label class="field-label" for="txNote">Descrição</label>
+            <input type="text" id="txNote" class="text-input" placeholder="Ex: Café, Salário..." maxlength="45" />
+          </div>
+        </div>
+
+        <button type="submit" id="btnSubmitTx" class="btn-full primary-glow">Confirmar Ordem</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: NOVA DESPESA FIXA -->
+  <div id="modalFixed" class="modal-backdrop hidden">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3>Nova Despesa Fixa</h3>
+        <button class="close-modal" data-close="modalFixed">✕</button>
+      </div>
+      <form id="formFixed">
+        <label class="field-label" for="fixedTitle">Nome da Conta</label>
+        <input type="text" id="fixedTitle" class="text-input" placeholder="Ex: Renda, Ginásio, Internet..." required />
+
+        <div class="form-row">
+          <div>
+            <label class="field-label" for="fixedAmount">Valor Mensal (€)</label>
+            <input type="number" id="fixedAmount" step="0.01" min="0.01" class="text-input mono" placeholder="0.00" required />
+          </div>
+          <div>
+            <label class="field-label" for="fixedCategory">Categoria</label>
+            <select id="fixedCategory" class="text-input"></select>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-full primary-glow">Guardar Despesa Fixa</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: COFRE (CRIAR / MOVIMENTAR) -->
+  <div id="modalPot" class="modal-backdrop hidden">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3>Novo Cofre de Poupança</h3>
+        <button class="close-modal" data-close="modalPot">✕</button>
+      </div>
+      <form id="formPot">
+        <label class="field-label" for="potName">Objetivo</label>
+        <input type="text" id="potName" class="text-input" placeholder="Ex: Fundo de Emergência, Férias..." required />
+
+        <div class="form-row">
+          <div>
+            <label class="field-label" for="potTarget">Meta (€)</label>
+            <input type="number" id="potTarget" step="1" min="1" class="text-input mono" placeholder="1000" required />
+          </div>
+          <div>
+            <label class="field-label" for="potIcon">Ícone</label>
+            <select id="potIcon" class="text-input">
+              <option value="🛡️">🛡️ Emergência</option>
+              <option value="✈️">✈️ Viagens</option>
+              <option value="💻">💻 Tech</option>
+              <option value="🚗">🚗 Carro</option>
+              <option value="🏠">🏠 Casa</option>
+              <option value="💎">💎 Investimento</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-full primary-glow">Criar Cofre</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: DEFINIÇÕES & BACKUP -->
+  <div id="modalSettings" class="modal-backdrop hidden">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3>Definições & Dados Locais</h3>
+        <button class="close-modal" data-close="modalSettings">✕</button>
+      </div>
+
+      <div class="setting-row">
+        <div>
+          <strong>Transitar Saldo entre Meses</strong>
+          <p class="sub-text">O saldo que sobra passa para o início do mês seguinte</p>
+        </div>
+        <input type="checkbox" id="toggleRollover" class="switch-input" />
+      </div>
+
+      <div class="divider"></div>
+
+      <p class="field-label">Cópia de Segurança (Telemóvel)</p>
+      <div class="backup-grid">
+        <button type="button" id="btnExportJson" class="btn-outline">⬇ Exportar JSON</button>
+        <label class="btn-outline file-btn">
+          ⬆ Importar JSON
+          <input type="file" id="inputImportJson" accept=".json" hidden />
+        </label>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="backup-grid">
+        <button type="button" id="btnDemoData" class="btn-outline">⚡ Carregar Demo</button>
+        <button type="button" id="btnResetAll" class="btn-danger-soft">🗑 Limpar Tudo</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
