@@ -1,0 +1,18 @@
+{
+  "name": "MonAI — Terminal Financeiro",
+  "short_name": "MonAI",
+  "description": "Gestão financeira pessoal estilo terminal cripto com memória local.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0B0E11",
+  "theme_color": "#0B0E11",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
