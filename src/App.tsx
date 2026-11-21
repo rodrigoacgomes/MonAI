@@ -33,7 +33,7 @@ interface FixedTemplate {
   categoryId: string;
   day: number;
   startMonthKey: string;
-  monthsCount: number; // 0 = contínuo
+  monthsCount: number;
   active: boolean;
 }
 
@@ -107,6 +107,19 @@ function monthDiff(startKey: string, targetKey: string): number {
 function formatMonthShort(mKey: string): string {
   const [y, m] = mKey.split("-").map(Number);
   return `${MONTHS_SHORT[m - 1]} ${y}`;
+}
+
+function findCategory(categories: Category[], id: string): Category {
+  return (
+    categories.find((c) => c.id === id) || {
+      id,
+      name: "Geral",
+      icon: "💠",
+      color: "#2E8BFF",
+      budget: 0,
+      type: "expense"
+    }
+  );
 }
 
 function createInitialState(): AppState {
@@ -196,9 +209,8 @@ function generateMissingRecurring(currentState: AppState, mKey: string): Transac
 
 export default function App() {
   const [state, setState] = useState<AppState>(loadInitialState);
-  const now = new Date();
-  const [selectedYear, setSelectedYear] = useState<number>(now.getFullYear());
-  const [selectedMonth, setSelectedMonth] = useState<number>(now.getMonth());
+  const [selectedYear, setSelectedYear] = useState<number>(() => new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState<number>(() => new Date().getMonth());
   const [activeTab, setActiveTab] = useState<TabType>("wallet");
 
   // Filters
@@ -268,7 +280,7 @@ export default function App() {
         return { ...prev, transactions: [...prev.transactions, ...checkAgain] };
       });
     }
-  }, [mKey, state.fixedTemplates, state.fixedSkipped]);
+  }, [mKey, state]);
 
   const formatMoney = (val: number, showSign = false): string => {
     if (state.settings.privacy) return "•••• €";
@@ -279,16 +291,6 @@ export default function App() {
     const prefix = val < 0 ? "-" : showSign && val > 0 ? "+" : "";
     return `${prefix}${abs} €`;
   };
-
-  const getCategory = (id: string): Category =>
-    state.categories.find((c) => c.id === id) || {
-      id,
-      name: "Geral",
-      icon: "💠",
-      color: "#2E8BFF",
-      budget: 0,
-      type: "expense"
-    };
 
   // Monthly Summaries
   const monthSummary = useMemo(() => {
@@ -334,7 +336,7 @@ export default function App() {
       .filter((t) => {
         if (filterCategory !== "ALL" && t.categoryId !== filterCategory) return false;
         if (!q) return true;
-        const cat = getCategory(t.categoryId);
+        const cat = findCategory(state.categories, t.categoryId);
         return (
           (t.note || "").toLowerCase().includes(q) ||
           cat.name.toLowerCase().includes(q) ||
@@ -351,7 +353,7 @@ export default function App() {
         totals[t.categoryId] = (totals[t.categoryId] || 0) + t.amount;
       });
     return Object.entries(totals)
-      .map(([catId, amount]) => ({ cat: getCategory(catId), amount }))
+      .map(([catId, amount]) => ({ cat: findCategory(state.categories, catId), amount }))
       .sort((a, b) => b.amount - a.amount);
   }, [monthSummary.txs, state.categories]);
 
@@ -373,7 +375,6 @@ export default function App() {
   // Draw Charts
   useEffect(() => {
     const drawAllCharts = () => {
-      // 1. Daily Line Chart
       if (dailyCanvasRef.current && activeTab === "wallet") {
         const canvas = dailyCanvasRef.current;
         const dpr = window.devicePixelRatio || 1;
@@ -456,7 +457,6 @@ export default function App() {
         }
       }
 
-      // 2. Category Donut
       if (donutCanvasRef.current && activeTab === "wallet") {
         const canvas = donutCanvasRef.current;
         const dpr = window.devicePixelRatio || 1;
@@ -493,7 +493,6 @@ export default function App() {
         }
       }
 
-      // 3. Yearly Bar Chart
       if (yearlyCanvasRef.current && activeTab === "yearly") {
         const canvas = yearlyCanvasRef.current;
         const dpr = window.devicePixelRatio || 1;
@@ -1082,7 +1081,7 @@ export default function App() {
                   <div className="empty-state">Sem movimentos registados neste filtro.</div>
                 ) : (
                   filteredTransactions.map((t) => {
-                    const cat = getCategory(t.categoryId);
+                    const cat = findCategory(state.categories, t.categoryId);
                     const signVal = t.type === "income" ? t.amount : -t.amount;
                     const dayLabel = t.date.split("-").reverse().slice(0, 2).join("/");
                     return (
@@ -1179,7 +1178,7 @@ export default function App() {
                   state.fixedTemplates
                     .filter((f) => fixedFilterType === "ALL" || f.type === fixedFilterType)
                     .map((f) => {
-                      const cat = getCategory(f.categoryId);
+                      const cat = findCategory(state.categories, f.categoryId);
                       const isInc = f.type === "income";
                       const durationText =
                         f.monthsCount > 0
